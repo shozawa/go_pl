@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"go_pl/ch02/lenconv"
-	"go_pl/ch02/tempconv"
-	"go_pl/ch02/weightconv"
 	"os"
 	"strconv"
+
+	"github.com/shozawa/go_pl/ch02/lenconv"
+	"github.com/shozawa/go_pl/ch02/tempconv"
+	"github.com/shozawa/go_pl/ch02/weightconv"
 )
 
 var measure = flag.String("m", "temp", "measure")
