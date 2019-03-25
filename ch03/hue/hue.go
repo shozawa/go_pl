@@ -1,5 +1,7 @@
 package hue
 
+// ref. https://qiita.com/masato_ka/items/c178a53c51364703d70b
+
 import (
 	"image/color"
 	"math"
