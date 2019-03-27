@@ -1,8 +1,12 @@
 package string
 
-import "bytes"
+import (
+	"bytes"
+	"sort"
+	"strings"
+)
 
-func comma(s string) string {
+func Comma(s string) string {
 	var buf bytes.Buffer
 	n := len(s)
 	for i, r := range s {
@@ -13,4 +17,16 @@ func comma(s string) string {
 		}
 	}
 	return buf.String()
+}
+
+func Sort(s string) string {
+	b := []byte(s)
+	sort.Slice(b, func(i, j int) bool { return b[i] < b[j] })
+	return string(b)
+}
+
+func IsAnagram(a, b string) bool {
+	a = Sort(strings.ToLower(strings.Replace(a, " ", "", -1)))
+	b = Sort(strings.ToLower(strings.Replace(b, " ", "", -1)))
+	return a == b
 }
