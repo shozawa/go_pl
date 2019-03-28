@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math"
 )
@@ -27,10 +28,16 @@ func render(f func(float64, float64) float64) {
 		"width='%d' height='%d'>\n", width, height)
 	for i := 0; i < cells; i++ {
 		for j := 0; j < cells; j++ {
-			ax, ay := polygon(i+1, j, f)
-			bx, by := polygon(i, j, f)
-			cx, cy := polygon(i, j+1, f)
-			dx, dy := polygon(i+1, j+1, f)
+			var err error
+			ax, ay, err := polygon(i+1, j, f)
+			bx, by, err := polygon(i, j, f)
+			cx, cy, err := polygon(i, j+1, f)
+			dx, dy, err := polygon(i+1, j+1, f)
+
+			if err != nil {
+				continue
+			}
+
 			fmt.Printf("<polygon points='%g, %g, %g, %g, %g, %g, %g, %g'/>\n",
 				ax, ay, bx, by, cx, cy, dx, dy)
 		}
@@ -38,18 +45,18 @@ func render(f func(float64, float64) float64) {
 	fmt.Println("</svg>")
 }
 
-func polygon(i, j int, f func(float64, float64) float64) (float64, float64) {
+func polygon(i, j int, f func(float64, float64) float64) (float64, float64, error) {
 	x := xyrange * (float64(i)/cells - 0.5)
 	y := xyrange * (float64(j)/cells - 0.5)
 
 	z := f(x, y)
 
-	return projection(x, y, z)
-}
-
-func corner(x, y float64) float64 {
-	r := math.Hypot(x, y)
-	return math.Sin(r) / r
+	if z < math.Inf(1) && z > math.Inf(-1) {
+		sx, sy := projection(x, y, z)
+		return sx, sy, nil
+	} else {
+		return 0, 0, errors.New("should not infinity")
+	}
 }
 
 func projection(x, y, z float64) (float64, float64) {
