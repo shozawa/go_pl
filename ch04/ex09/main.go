@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 )
 
 func main() {
@@ -18,8 +19,19 @@ func main() {
 
 	fmt.Print("word\tcount\n")
 
-	// TODO: 出現回数降順で並び替え
-	for w, c := range count {
-		fmt.Printf("%s\t%v\n", w, c)
+	for _, w := range sortWords(count) {
+		fmt.Printf("%s\t%v\n", w, count[w])
 	}
+}
+
+func sortWords(count map[string]int) []string {
+	words := make([]string, 0, len(count))
+
+	for word, _ := range count {
+		words = append(words, word)
+	}
+
+	sort.Slice(words, func(i, j int) bool { return count[words[i]] > count[words[j]] })
+
+	return words
 }
