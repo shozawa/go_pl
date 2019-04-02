@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"unicode"
 )
 
 // Rune の数を数える
-
 func main() {
 	input := bufio.NewReader(os.Stdin)
 	count := make(map[rune]int)
@@ -26,7 +26,6 @@ func main() {
 			continue
 		}
 
-		// TODO: カテゴリ追加
 		switch {
 		case unicode.IsLetter(r):
 			count['L']++
@@ -37,9 +36,16 @@ func main() {
 		}
 	}
 
+	runes := []rune{}
+
+	for r, _ := range count {
+		runes = append(runes, r)
+	}
+
+	sort.Slice(runes, func(i, j int) bool { return count[runes[i]] > count[runes[j]] })
+
 	fmt.Print("rune\tcount\n")
-	// TODO: 出現回数降順で表示する
-	for k, v := range count {
-		fmt.Printf("%q\t%v\n", k, v)
+	for _, r := range runes {
+		fmt.Printf("%q\t%v\n", r, count[r])
 	}
 }
