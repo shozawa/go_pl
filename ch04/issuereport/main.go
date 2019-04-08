@@ -3,7 +3,7 @@ package main
 import (
 	"html/template"
 	"log"
-	"os"
+	"net/http"
 	"time"
 
 	"github.com/shozawa/go_pl/ch04/github"
@@ -34,14 +34,20 @@ func daysAgo(t time.Time) int {
 }
 
 func main() {
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe("localhost:8000", nil))
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
 	report := template.Must(template.New("report").
 		Funcs(template.FuncMap{"daysAgo": daysAgo}).
 		Parse(templ))
-	result, err := github.SearchIssues(os.Args[1:])
+	q := []string{"repo:golang/go", "is:open"}
+	result, err := github.SearchIssues(q)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := report.Execute(os.Stdout, result); err != nil {
+	if err := report.Execute(w, result); err != nil {
 		log.Fatal(err)
 	}
 }
