@@ -25,6 +25,30 @@ func main() {
 		issue, err := getIssue(id)
 		fmt.Print("State\tTitle\tBody\n")
 		fmt.Printf("%s\t%s\t%s\n", issue.State, issue.Title, issue.Body)
+	case "update":
+		id, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+		issue, err := getIssue(id)
+		j, _ := json.MarshalIndent(issue, "", "  ")
+		tempFile, _ := ioutil.TempFile("", "")
+		io.Copy(tempFile, strings.NewReader(string(j)))
+		launchEditor(tempFile.Name())
+		defer tempFile.Close()
+
+		f, err := os.Open(tempFile.Name())
+		if err != nil {
+			os.Exit(1)
+		}
+		defer f.Close()
+
+		if err := json.NewDecoder(f).Decode(&issue); err != nil {
+			os.Exit(1)
+		}
+
+		update(id, issue)
+		fmt.Println(issue)
 	case "create":
 		tmpfile, _ := ioutil.TempFile("", "")
 		defer os.Remove(tmpfile.Name())
@@ -105,9 +129,9 @@ func closeIssue(id int) {
 }
 
 type Issue struct {
-	Title string
-	Body  string
-	State string
+	Title string `json:"title"`
+	Body  string `json:"body"`
+	State string `json:"state"`
 }
 
 func getIssue(id int) (*Issue, error) {
@@ -151,5 +175,31 @@ func create(title string, body string) {
 
 	defer res.Body.Close()
 
+	io.Copy(os.Stdout, res.Body)
+}
+
+func update(id int, issue *Issue) {
+	token := os.Getenv("GITHUB_PERSONAL_API_TOKEN")
+	url := fmt.Sprintf("https://api.github.com/repos/shozawa/go_pl/issues/%d", id)
+	client := http.DefaultClient
+
+	json, _ := json.Marshal(issue)
+
+	req, err := http.NewRequest("PATCH", url, strings.NewReader(string(json)))
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "token "+token)
+
+	res, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer res.Body.Close()
 	io.Copy(os.Stdout, res.Body)
 }
