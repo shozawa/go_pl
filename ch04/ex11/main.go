@@ -18,38 +18,52 @@ func main() {
 	cmd := os.Args[1]
 	switch cmd {
 	case "get":
-		id, err := strconv.Atoi(os.Args[2])
+		repository := os.Args[2]
+		id, err := strconv.Atoi(os.Args[3])
 		if err != nil {
 			log.Fatal(err)
 		}
-		issue, err := getIssue(id)
+		issue, err := getIssue(repository, id)
 		fmt.Print("State\tTitle\tBody\n")
 		fmt.Printf("%s\t%s\t%s\n", issue.State, issue.Title, issue.Body)
 	case "update":
-		id, err := strconv.Atoi(os.Args[2])
+		repository := os.Args[2]
+		id, err := strconv.Atoi(os.Args[3])
 		if err != nil {
 			log.Fatal(err)
 		}
-		issue, err := getIssue(id)
-		j, _ := json.MarshalIndent(issue, "", "  ")
-		tempFile, _ := ioutil.TempFile("", "")
-		io.Copy(tempFile, strings.NewReader(string(j)))
-		launchEditor(tempFile.Name())
-		defer tempFile.Close()
 
-		f, err := os.Open(tempFile.Name())
+		issue, err := getIssue(repository, id)
 		if err != nil {
 			os.Exit(1)
 		}
-		defer f.Close()
 
-		if err := json.NewDecoder(f).Decode(&issue); err != nil {
+		serialized, err := json.MarshalIndent(issue, "", "  ")
+		if err != nil {
 			os.Exit(1)
 		}
 
-		update(id, issue)
+		tempFile, err := ioutil.TempFile("", "")
+		if err != nil {
+			os.Exit(1)
+		}
+		io.Copy(tempFile, strings.NewReader(string(serialized)))
+		launchEditor(tempFile.Name())
+		defer tempFile.Close()
+
+		editedFile, err := os.Open(tempFile.Name())
+		if err != nil {
+			os.Exit(1)
+		}
+		defer editedFile.Close()
+
+		if err := json.NewDecoder(editedFile).Decode(&issue); err != nil {
+			os.Exit(1)
+		}
+		issue.Update()
 		fmt.Println(issue)
 	case "create":
+		repository := os.Args[2]
 		tmpfile, _ := ioutil.TempFile("", "")
 		defer os.Remove(tmpfile.Name())
 
@@ -68,13 +82,24 @@ func main() {
 		for scaner.Scan() {
 			body = append(body, scaner.Text())
 		}
-		create(title, strings.Join(body, "\n"))
+		issue := Issue{
+			Repository: repository,
+			Title:      title,
+			Body:       strings.Join(body, "\n"),
+		}
+		issue.Create()
 	case "close":
-		id, err := strconv.Atoi(os.Args[2])
+		repository := os.Args[2]
+		id, err := strconv.Atoi(os.Args[3])
 		if err != nil {
 			log.Fatal(err)
 		}
-		closeIssue(id)
+		issue, err := getIssue(repository, id)
+		if err != nil {
+			os.Exit(1)
+		}
+		issue.Close()
+		issue.Update()
 	default:
 		fmt.Println("help here.")
 	}
@@ -97,50 +122,21 @@ func getEditor() string {
 	}
 }
 
-func closeIssue(id int) {
-	token := os.Getenv("GITHUB_PERSONAL_API_TOKEN")
-	url := fmt.Sprintf("https://api.github.com/repos/shozawa/go_pl/issues/%d", id)
-
-	client := http.DefaultClient
-
-	json, _ := json.Marshal(map[string]interface{}{
-		"state": "closed",
-	})
-
-	req, err := http.NewRequest("PATCH", url, strings.NewReader(string(json)))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "token "+token)
-
-	res, err := client.Do(req)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer res.Body.Close()
-
-	io.Copy(os.Stdout, res.Body)
-
-}
-
 type Issue struct {
-	Title string `json:"title"`
-	Body  string `json:"body"`
-	State string `json:"state"`
+	Id         int    `json:"-"`
+	Repository string `json:"-"`
+	Title      string `json:"title"`
+	Body       string `json:"body"`
+	State      string `json:"state"`
 }
 
-func getIssue(id int) (*Issue, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/shozawa/go_pl/issues/%d", id)
+func getIssue(repository string, id int) (*Issue, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d", repository, id)
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	var issue Issue
+	issue := Issue{Id: id, Repository: repository}
 	if err = json.NewDecoder(res.Body).Decode(&issue); err != nil {
 		return nil, err
 	}
@@ -148,58 +144,51 @@ func getIssue(id int) (*Issue, error) {
 	return &issue, nil
 }
 
-func create(title string, body string) {
+func executeCommand(url string, method string, issue *Issue) error {
 	token := os.Getenv("GITHUB_PERSONAL_API_TOKEN")
-	url := "https://api.github.com/repos/shozawa/go_pl/issues"
 	client := http.DefaultClient
 
-	json, _ := json.Marshal(map[string]interface{}{
-		"title": title,
-		"body":  body,
-	})
-
-	req, err := http.NewRequest("POST", url, strings.NewReader(string(json)))
-
+	data, err := json.Marshal(issue)
 	if err != nil {
-		fmt.Println(err)
+		return err
+	}
+	req, err := http.NewRequest(method, url, strings.NewReader(string(data)))
+	if err != nil {
+		return err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "token "+token)
 
 	res, err := client.Do(req)
-
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	defer res.Body.Close()
-
 	io.Copy(os.Stdout, res.Body)
+	return nil
 }
 
-func update(id int, issue *Issue) {
-	token := os.Getenv("GITHUB_PERSONAL_API_TOKEN")
-	url := fmt.Sprintf("https://api.github.com/repos/shozawa/go_pl/issues/%d", id)
-	client := http.DefaultClient
+func (issue *Issue) URL() string {
+	return fmt.Sprintf("https://api.github.com/repos/%s/issues/%d", issue.Repository, issue.Id)
+}
 
-	json, _ := json.Marshal(issue)
-
-	req, err := http.NewRequest("PATCH", url, strings.NewReader(string(json)))
-
+func (issue *Issue) Create() {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/issues", issue.Repository)
+	err := executeCommand(url, "POST", issue)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
+}
 
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "token "+token)
+func (issue *Issue) Close() {
+	issue.State = "closed"
+}
 
-	res, err := client.Do(req)
-
+func (issue *Issue) Update() {
+	err := executeCommand(issue.URL(), "PATCH", issue)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
-
-	defer res.Body.Close()
-	io.Copy(os.Stdout, res.Body)
 }
