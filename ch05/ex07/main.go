@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -24,7 +25,6 @@ func pretty() {
 
 	var depth int
 
-	// TODO: コメントノード
 	pre := func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			if n.FirstChild != nil {
@@ -40,7 +40,9 @@ func pretty() {
 		}
 
 		if n.Type == html.TextNode {
-			fmt.Fprintf(out, "%*s%s\n", depth*2, "", n.Data)
+			if text := strings.TrimSpace(n.Data); text != "" {
+				fmt.Fprintf(out, "%*s%s\n", depth*2, "", text)
+			}
 		}
 	}
 
