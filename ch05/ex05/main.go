@@ -46,10 +46,6 @@ func visit(n *html.Node, f func(*html.Node)) {
 		return
 	}
 	f(n)
-	if n.FirstChild != nil {
-		visit(n.FirstChild, f)
-	}
-	if n.NextSibling != nil {
-		visit(n.NextSibling, f)
-	}
+	visit(n.FirstChild, f)
+	visit(n.NextSibling, f)
 }
