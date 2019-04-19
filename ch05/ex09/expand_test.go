@@ -14,6 +14,7 @@ func TestExpand(t *testing.T) {
 		{"foo $bar buzz", "foo BAR buzz"},
 		{"foo $bar $buzz", "foo BAR BUZZ"},
 		{"foo", "foo"},
+		{"pa$$", "pa$$"},
 		{"", ""},
 	}
 	for _, test := range tests {

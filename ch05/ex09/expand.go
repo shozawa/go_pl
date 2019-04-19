@@ -1,21 +1,15 @@
 package expand
 
 import (
-	"bufio"
 	"strings"
 )
 
-func Expand(s string, f func(string) string) string {
-	scanner := bufio.NewScanner(strings.NewReader(s))
-	scanner.Split(bufio.ScanWords)
-
+func Expand(s string, mapping func(string) string) string {
 	var expanded []string
-
-	for scanner.Scan() {
-		word := scanner.Text()
+	// 余分な空白は削除されるけど...いいか
+	for _, word := range strings.Fields(s) {
 		if strings.HasPrefix(word, "$") {
-			word = strings.ReplaceAll(word, "$", "")
-			word = f(word)
+			word = mapping(word[1:])
 		}
 		expanded = append(expanded, word)
 	}
