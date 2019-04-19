@@ -1,11 +1,23 @@
 package expand
 
-import "strings"
+import (
+	"bufio"
+	"strings"
+)
 
 func Expand(s string, f func(string) string) string {
-	split := strings.SplitN(s, "$", 2)
-	if len(split) != 2 {
-		return s
+	scanner := bufio.NewScanner(strings.NewReader(s))
+	scanner.Split(bufio.ScanWords)
+
+	var expanded []string
+
+	for scanner.Scan() {
+		word := scanner.Text()
+		if strings.HasPrefix(word, "$") {
+			word = strings.ReplaceAll(word, "$", "")
+			word = f(word)
+		}
+		expanded = append(expanded, word)
 	}
-	return split[0] + f(split[1])
+	return strings.Join(expanded, " ")
 }

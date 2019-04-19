@@ -10,8 +10,9 @@ func TestExpand(t *testing.T) {
 		input string
 		want  string
 	}{
-		{"foo$bar", "fooBAR"},
-		{"foo$bar$buzz", "fooBAR$BUZZ"},
+		{"foo $bar", "foo BAR"},
+		{"foo $bar buzz", "foo BAR buzz"},
+		{"foo $bar $buzz", "foo BAR BUZZ"},
 		{"foo", "foo"},
 		{"", ""},
 	}
