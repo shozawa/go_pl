@@ -1,4 +1,4 @@
-package vargs
+package ex15 
 
 func Max(vals ...int) (max int) {
 	for _, val := range vals {

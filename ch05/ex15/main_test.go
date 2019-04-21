@@ -1,4 +1,4 @@
-package vargs
+package ex15
 
 import "testing"
 
