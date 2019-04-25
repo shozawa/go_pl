@@ -1,6 +1,7 @@
 package links
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,16 +18,22 @@ func Exract(url string, cache bool) ([]string, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	// [question] html.Parseとファイルの保存（io.Copy）で2回ストリームを読むので
+	// バッファを巻き戻すかTeeで二方向に出力しなきゃいけない？ もっといい方法ありそう
+	buf := bytes.NewBuffer(nil)
+	tee := io.TeeReader(res.Body, buf)
+
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("getting %s: %s", url, res.Status)
 	}
-	doc, err := html.Parse(res.Body)
+	doc, err := html.Parse(tee)
 	if err != nil {
 		return nil, fmt.Errorf("parsing %s as HTML: %v", url, err)
 	}
 	// ドキュメントの保存
 	if cache {
-		save(url, res)
+		save(url, buf)
 	}
 	var links []string
 	forEachNode(doc, func(n *html.Node) {
@@ -56,7 +63,7 @@ func forEachNode(n *html.Node, proc func(*html.Node)) {
 	forEachNode(n.NextSibling, proc)
 }
 
-func save(url string, resp *http.Response) error {
+func save(url string, src io.Reader) error {
 	// FIXME: なんどもParseしてて無駄
 	u, err := neturl.Parse(url)
 	if err != nil {
@@ -71,8 +78,7 @@ func save(url string, resp *http.Response) error {
 	}
 	f, err := os.Create(pathpackage.Join(dir, "index.html"))
 	defer f.Close()
-	// FXIME: コピーできてない...空ファイルができる
-	_, err = io.Copy(f, resp.Body)
+	_, err = io.Copy(f, src)
 	if err != nil {
 		fmt.Println(err)
 		return err
