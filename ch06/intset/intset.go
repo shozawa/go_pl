@@ -9,17 +9,17 @@ type IntSet struct {
 	words []uint64
 }
 
-func (i *IntSet) Add(x int) {
+func (s *IntSet) Add(x int) {
 	word, bit := x/64, uint(x%64)
-	for word >= len(i.words) {
-		i.words = append(i.words, 0)
+	for word >= len(s.words) {
+		s.words = append(s.words, 0)
 	}
-	i.words[word] |= 1 << bit
+	s.words[word] |= 1 << bit
 }
 
-func (i *IntSet) Has(x int) bool {
+func (s *IntSet) Has(x int) bool {
 	word, bit := x/64, uint(x%64)
-	return word < len(i.words) && i.words[word]&(1<<bit) != 0
+	return word < len(s.words) && s.words[word]&(1<<bit) != 0
 }
 
 func (s *IntSet) UnionWith(other *IntSet) {
@@ -32,11 +32,11 @@ func (s *IntSet) UnionWith(other *IntSet) {
 	}
 }
 
-func (i *IntSet) String() string {
+func (s *IntSet) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
 
-	for i, word := range i.words {
+	for i, word := range s.words {
 		if word == 0 {
 			continue
 		}
