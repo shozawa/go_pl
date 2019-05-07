@@ -9,6 +9,14 @@ type IntSet struct {
 	words []uint64
 }
 
+func New(numbers ...int) *IntSet {
+	set := &IntSet{}
+	for _, n := range numbers {
+		set.Add(n)
+	}
+	return set
+}
+
 func (s *IntSet) Len() (count int) {
 	for _, word := range s.words {
 		count += popcount(word)

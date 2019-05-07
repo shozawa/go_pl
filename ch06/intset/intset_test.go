@@ -2,6 +2,14 @@ package intset
 
 import "testing"
 
+func TestNew(t *testing.T) {
+	set := New(1, 2, 66)
+	want := "{1 2 66}"
+	if got := set.String(); got != want {
+		t.Errorf("New(1, 2, 66) is not %s. got=%s", want, got)
+	}
+}
+
 func TestString(t *testing.T) {
 	tests := []struct {
 		numbers []int
