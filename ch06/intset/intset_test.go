@@ -92,3 +92,26 @@ func TestLen(t *testing.T) {
 		}
 	}
 }
+
+func TestRemove(t *testing.T) {
+	tests := []struct {
+		numbers []int
+		removed int
+		want    string
+	}{
+		{[]int{1}, 1, "{}"},
+		{[]int{1, 2, 3}, 2, "{1 3}"},
+		{[]int{1, 2, 3}, 5, "{1 2 3}"},
+		{[]int{1, 65, 66}, 65, "{1 66}"},
+	}
+	for _, test := range tests {
+		set := &IntSet{}
+		for _, n := range test.numbers {
+			set.Add(n)
+		}
+		set.Remove(test.removed)
+		if got := set.String(); got != test.want {
+			t.Errorf("set.Remove(%d) %s is not %q. got=%q", test.removed, set.String(), test.want, got)
+		}
+	}
+}

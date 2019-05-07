@@ -24,6 +24,15 @@ func (s *IntSet) Add(x int) {
 	s.words[word] |= 1 << bit
 }
 
+func (s *IntSet) Remove(x int) {
+	word, bit := x/64, uint(x%64)
+	if word >= len(s.words) {
+		// 何もしない
+	} else {
+		s.words[word] &= ^(1 << bit)
+	}
+}
+
 func (s *IntSet) Has(x int) bool {
 	word, bit := x/64, uint(x%64)
 	return word < len(s.words) && s.words[word]&(1<<bit) != 0
