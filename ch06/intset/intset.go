@@ -22,6 +22,16 @@ func (i *IntSet) Has(x int) bool {
 	return word < len(i.words) && i.words[word]&(1<<bit) != 0
 }
 
+func (s *IntSet) UnionWith(other *IntSet) {
+	for i, word := range other.words {
+		if i < len(s.words) {
+			s.words[i] |= word
+		} else {
+			s.words = append(s.words, word)
+		}
+	}
+}
+
 func (i *IntSet) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
