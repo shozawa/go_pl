@@ -70,3 +70,25 @@ func TestUnionWith(t *testing.T) {
 		}
 	}
 }
+
+func TestLen(t *testing.T) {
+	tests := []struct {
+		numbers []int
+		want    int
+	}{
+		{[]int{}, 0},
+		{[]int{1}, 1},
+		{[]int{1, 2}, 2},
+		{[]int{65, 66}, 2},
+		{[]int{1, 2, 65, 128}, 4},
+	}
+	for _, test := range tests {
+		set := &IntSet{}
+		for _, n := range test.numbers {
+			set.Add(n)
+		}
+		if got := set.Len(); got != test.want {
+			t.Errorf("set.Len() %s is not %v. got=%v", set.String(), test.want, got)
+		}
+	}
+}

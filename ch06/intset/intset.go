@@ -9,6 +9,13 @@ type IntSet struct {
 	words []uint64
 }
 
+func (s *IntSet) Len() (count int) {
+	for _, word := range s.words {
+		count += popcount(word)
+	}
+	return
+}
+
 func (s *IntSet) Add(x int) {
 	word, bit := x/64, uint(x%64)
 	for word >= len(s.words) {
@@ -52,4 +59,11 @@ func (s *IntSet) String() string {
 
 	buf.WriteByte('}')
 	return buf.String()
+}
+
+func popcount(x uint64) (count int) {
+	for ; x != 0; x &= x - 1 {
+		count++
+	}
+	return
 }
