@@ -56,6 +56,10 @@ func (s *IntSet) UnionWith(other *IntSet) {
 	}
 }
 
+func (s *IntSet) Clear() {
+	s.words = []uint64{}
+}
+
 func (s *IntSet) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('{')

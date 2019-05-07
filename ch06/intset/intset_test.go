@@ -123,3 +123,24 @@ func TestRemove(t *testing.T) {
 		}
 	}
 }
+
+func TestClear(t *testing.T) {
+	tests := []struct {
+		set  *IntSet
+		want *IntSet
+	}{
+		{New(1, 2, 66), New()},
+	}
+	for _, test := range tests {
+		test.set.Clear()
+		assertEqual(t, test.want, test.set)
+	}
+}
+
+func assertEqual(t *testing.T, want, got *IntSet) bool {
+	if want.String() != got.String() {
+		t.Errorf("want=%s but got=%s", want.String(), got.String())
+		return false
+	}
+	return true
+}
