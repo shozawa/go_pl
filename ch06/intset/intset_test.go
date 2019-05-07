@@ -3,12 +3,21 @@ package intset
 import "testing"
 
 func TestString(t *testing.T) {
-	set := &IntSet{}
-	set.Add(1)
-	set.Add(2)
-	set.Add(3)
-	want := "{1 2 3}"
-	if got := set.String(); got != want {
-		t.Errorf("set.String() is not %q. got=%q", want, got)
+	tests := []struct {
+		numbers []int
+		want    string
+	}{
+		{[]int{}, "{}"},
+		{[]int{100}, "{100}"},
+		{[]int{1, 2, 3}, "{1 2 3}"},
+	}
+	for _, test := range tests {
+		set := &IntSet{}
+		for _, n := range test.numbers {
+			set.Add(n)
+		}
+		if got := set.String(); got != test.want {
+			t.Errorf("set.String() is not %q. got=%q", test.want, got)
+		}
 	}
 }
