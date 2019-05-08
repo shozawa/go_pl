@@ -76,6 +76,19 @@ func (s *IntSet) UnionWith(other *IntSet) {
 	}
 }
 
+func (s *IntSet) IntersectWith(other *IntSet) *IntSet {
+	result := &IntSet{}
+	// FIXME: もっときれいに
+	for i := range s.words {
+		if len(other.words) <= i {
+			break
+		}
+		word := s.words[i] & other.words[i]
+		result.words = append(result.words, word)
+	}
+	return result
+}
+
 func (s *IntSet) Clear() {
 	s.words = []uint64{}
 }

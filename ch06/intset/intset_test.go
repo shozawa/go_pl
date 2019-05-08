@@ -103,6 +103,27 @@ func TestUnionWith(t *testing.T) {
 	}
 }
 
+func TestIntersectWith(t *testing.T) {
+	tests := []struct {
+		a    *IntSet
+		b    *IntSet
+		want string
+	}{
+		{New(), New(), "{}"},
+		{New(), New(2), "{}"},
+		{New(2), New(), "{}"},
+		{New(1, 2, 3), New(2), "{2}"},
+		{New(1, 2, 3), New(2, 3), "{2 3}"},
+		{New(1, 2, 100), New(2, 3), "{2}"},
+		{New(2, 3), New(1, 2, 100), "{2}"},
+	}
+	for _, test := range tests {
+		if got := test.a.IntersectWith(test.b); got.String() != test.want {
+			t.Errorf("a.IntersectWith(b) is not %s. got=%s", test.want, got)
+		}
+	}
+}
+
 func TestLen(t *testing.T) {
 	tests := []struct {
 		numbers []int
