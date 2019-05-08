@@ -106,6 +106,12 @@ func (s *IntSet) DifferenceWith(other *IntSet) *IntSet {
 	return result
 }
 
+func (s *IntSet) SymetricDifferenceWith(other *IntSet) *IntSet {
+	union := s.UnionWith(other)
+	intersection := s.IntersectWith(other)
+	return union.DifferenceWith(intersection)
+}
+
 func (s *IntSet) Clear() {
 	s.words = []uint64{}
 }

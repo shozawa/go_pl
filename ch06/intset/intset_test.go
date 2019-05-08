@@ -148,6 +148,23 @@ func TestDifferenceWith(t *testing.T) {
 	}
 }
 
+func TestSymetricDifferenceWith(t *testing.T) {
+	tests := []struct {
+		a    *IntSet
+		b    *IntSet
+		want string
+	}{
+		{New(1), New(), "{1}"},
+		{New(1, 2), New(2, 3), "{1 3}"},
+		{New(1, 100), New(100, 200), "{1 200}"},
+	}
+	for _, test := range tests {
+		if got := test.a.SymetricDifferenceWith(test.b); got.String() != test.want {
+			t.Errorf("a.SymetricDifferenceWith(b) is not %s. got=%s", test.want, got)
+		}
+	}
+}
+
 func TestLen(t *testing.T) {
 	tests := []struct {
 		numbers []int
