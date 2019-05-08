@@ -124,6 +124,27 @@ func TestIntersectWith(t *testing.T) {
 	}
 }
 
+func TestDifferenceWith(t *testing.T) {
+	tests := []struct {
+		a    *IntSet
+		b    *IntSet
+		want string
+	}{
+		{New(1), New(), "{1}"},
+		{New(1, 2, 3), New(2), "{1 3}"},
+		{New(1, 2, 3), New(5), "{1 2 3}"},
+		{New(1, 100), New(100), "{1}"},
+		{New(1, 2), New(100), "{1 2}"},
+		{New(1, 2, 3, 4, 5, 6), New(2, 4, 6, 8), "{1 3 5}"},
+		{New(2, 4, 6, 8), New(1, 2, 3, 4, 5, 6), "{8}"},
+	}
+	for _, test := range tests {
+		if got := test.a.DifferenceWith(test.b); got.String() != test.want {
+			t.Errorf("a.DifferenceWith(b) is not %s. got=%s", test.want, got)
+		}
+	}
+}
+
 func TestLen(t *testing.T) {
 	tests := []struct {
 		numbers []int

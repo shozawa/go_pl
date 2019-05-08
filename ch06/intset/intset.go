@@ -89,6 +89,21 @@ func (s *IntSet) IntersectWith(other *IntSet) *IntSet {
 	return result
 }
 
+func (s *IntSet) DifferenceWith(other *IntSet) *IntSet {
+	result := &IntSet{}
+	// FIXME: もっときれいに
+	for i := range s.words {
+		var word uint64
+		if len(other.words) <= i {
+			word = s.words[i]
+		} else {
+			word = s.words[i] & ^other.words[i]
+		}
+		result.words = append(result.words, word)
+	}
+	return result
+}
+
 func (s *IntSet) Clear() {
 	s.words = []uint64{}
 }
