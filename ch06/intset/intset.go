@@ -66,14 +66,16 @@ func (s *IntSet) Has(x int) bool {
 	return word < len(s.words) && s.words[word]&(1<<bit) != 0
 }
 
-func (s *IntSet) UnionWith(other *IntSet) {
+func (s *IntSet) UnionWith(other *IntSet) *IntSet {
+	result := s.Copy()
 	for i, word := range other.words {
-		if i < len(s.words) {
-			s.words[i] |= word
+		if i < len(result.words) {
+			result.words[i] |= word
 		} else {
-			s.words = append(s.words, word)
+			result.words = append(s.words, word)
 		}
 	}
+	return result
 }
 
 func (s *IntSet) IntersectWith(other *IntSet) *IntSet {

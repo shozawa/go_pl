@@ -96,7 +96,7 @@ func TestUnionWith(t *testing.T) {
 		for _, n := range test.b {
 			b.Add(n)
 		}
-		a.UnionWith(b)
+		a = a.UnionWith(b)
 		if got := a.String(); got != test.want {
 			t.Errorf("union is not %s. got=%s", test.want, got)
 		}
