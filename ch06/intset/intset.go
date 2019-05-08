@@ -72,7 +72,7 @@ func (s *IntSet) UnionWith(other *IntSet) *IntSet {
 		if i < len(result.words) {
 			result.words[i] |= word
 		} else {
-			result.words = append(s.words, word)
+			result.words = append(result.words, word)
 		}
 	}
 	return result

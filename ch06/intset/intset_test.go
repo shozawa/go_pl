@@ -86,6 +86,8 @@ func TestUnionWith(t *testing.T) {
 		{[]int{}, []int{}, "{}"},
 		{[]int{1}, []int{2}, "{1 2}"},
 		{[]int{1, 2}, []int{3}, "{1 2 3}"},
+		{[]int{}, []int{200}, "{200}"},
+		{[]int{1, 100}, []int{100, 200}, "{1 100 200}"},
 	}
 	for _, test := range tests {
 		a := &IntSet{}
@@ -116,6 +118,7 @@ func TestIntersectWith(t *testing.T) {
 		{New(1, 2, 3), New(2, 3), "{2 3}"},
 		{New(1, 2, 100), New(2, 3), "{2}"},
 		{New(2, 3), New(1, 2, 100), "{2}"},
+		{New(1, 100), New(100, 200), "{100}"},
 	}
 	for _, test := range tests {
 		if got := test.a.IntersectWith(test.b); got.String() != test.want {
