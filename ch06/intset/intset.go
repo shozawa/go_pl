@@ -32,6 +32,12 @@ func (s *IntSet) Add(x int) {
 	s.words[word] |= 1 << bit
 }
 
+func (s *IntSet) AddAll(numbers ...int) {
+	for _, n := range numbers {
+		s.Add(n)
+	}	
+}
+
 func (s *IntSet) Remove(x int) {
 	word, bit := x/64, uint(x%64)
 	if word >= len(s.words) {

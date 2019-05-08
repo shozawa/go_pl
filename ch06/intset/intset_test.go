@@ -10,6 +10,14 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestAddAll(t *testing.T) {
+	set := IntSet{}
+	set.AddAll(1, 2, 70, 150)
+	if set.String() != "{1 2 70 150}" {
+		t.Errorf("set is not {1 2 70 150}. got=%s", set.String())
+	}
+}
+
 func TestString(t *testing.T) {
 	tests := []struct {
 		numbers []int
