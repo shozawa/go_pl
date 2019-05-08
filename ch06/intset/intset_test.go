@@ -18,6 +18,22 @@ func TestAddAll(t *testing.T) {
 	}
 }
 
+func TestElems(t *testing.T) {
+	tests := []struct {
+		set  *IntSet
+		want []uint64
+	}{
+		{New(), []uint64{}},
+		{New(1, 2, 3), []uint64{1, 2, 3}},
+		{New(1, 2, 3, 100), []uint64{1, 2, 3, 100}},
+	}
+	for _, test := range tests {
+		if got := test.set.Elems(); !equalSlice(got, test.want) {
+			t.Errorf("set.Elems() is not %v. got=%v", test.want, got)
+		}
+	}
+}
+
 func TestString(t *testing.T) {
 	tests := []struct {
 		numbers []int
@@ -164,6 +180,21 @@ func testEqual(t *testing.T, want, got *IntSet) bool {
 	if want.String() != got.String() {
 		t.Errorf("want=%s but got=%s", want.String(), got.String())
 		return false
+	}
+	return true
+}
+
+func equalSlice(a, b []uint64) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
 	}
 	return true
 }

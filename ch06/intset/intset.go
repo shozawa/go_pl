@@ -24,6 +24,20 @@ func (s *IntSet) Len() (count int) {
 	return
 }
 
+func (s *IntSet) Elems() []uint64 {
+	// FIXME: なんかもっと賢いやり方がありそう
+	numbers := []uint64{}
+	for i := range s.words {
+		for j := 0; j < 64; j++ {
+			number := i*64 + j
+			if s.Has(number) {
+				numbers = append(numbers, uint64(i*64+j))
+			}
+		}
+	}
+	return numbers
+}
+
 func (s *IntSet) Add(x int) {
 	word, bit := x/64, uint(x%64)
 	for word >= len(s.words) {
@@ -35,7 +49,7 @@ func (s *IntSet) Add(x int) {
 func (s *IntSet) AddAll(numbers ...int) {
 	for _, n := range numbers {
 		s.Add(n)
-	}	
+	}
 }
 
 func (s *IntSet) Remove(x int) {
