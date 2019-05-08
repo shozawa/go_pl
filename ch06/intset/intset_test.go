@@ -137,6 +137,21 @@ func TestClear(t *testing.T) {
 	}
 }
 
+func TestCopy(t *testing.T) {
+	src := New(1, 2, 3)
+	dst := src.Copy()
+	if dst.String() != "{1 2 3}" {
+		t.Errorf("copy.String() is not {1 2 3}. got=%s", dst.String())
+	}
+
+	// mutate
+	src.Add(4)
+
+	if dst.String() != "{1 2 3}" {
+		t.Errorf("copy.String() is not {1 2 3}. got=%s", dst.String())
+	}
+}
+
 func assertEqual(t *testing.T, want, got *IntSet) bool {
 	if want.String() != got.String() {
 		t.Errorf("want=%s but got=%s", want.String(), got.String())

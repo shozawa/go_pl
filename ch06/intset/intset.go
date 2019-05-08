@@ -60,6 +60,14 @@ func (s *IntSet) Clear() {
 	s.words = []uint64{}
 }
 
+func (s *IntSet) Copy() *IntSet {
+	words := make([]uint64, len(s.words))
+	copy(words, s.words)
+	dst := &IntSet{}
+	dst.words = words
+	return dst
+}
+
 func (s *IntSet) String() string {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
