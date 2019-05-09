@@ -58,9 +58,7 @@ func (s *IntSet) AddAll(numbers ...int) {
 
 func (s *IntSet) Remove(x int) {
 	word, bit := x/SIZE, uint(x%SIZE)
-	if word >= len(s.words) {
-		// 何もしない
-	} else {
+	if word < len(s.words) {
 		s.words[word] &= ^(1 << bit)
 	}
 }
