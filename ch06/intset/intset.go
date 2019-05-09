@@ -5,8 +5,12 @@ import (
 	"fmt"
 )
 
+const (
+	SIZE = 32 << (^uint(0) >> 63)
+)
+
 type IntSet struct {
-	words []uint64
+	words []uint
 }
 
 func New(numbers ...int) *IntSet {
@@ -24,14 +28,14 @@ func (s *IntSet) Len() (count int) {
 	return
 }
 
-func (s *IntSet) Elems() []uint64 {
+func (s *IntSet) Elems() []uint {
 	// FIXME: なんかもっと賢いやり方がありそう
-	numbers := []uint64{}
+	numbers := []uint{}
 	for i := range s.words {
-		for j := 0; j < 64; j++ {
-			number := i*64 + j
+		for j := 0; j < SIZE; j++ {
+			number := i*SIZE + j
 			if s.Has(number) {
-				numbers = append(numbers, uint64(i*64+j))
+				numbers = append(numbers, uint(i*SIZE+j))
 			}
 		}
 	}
@@ -39,7 +43,7 @@ func (s *IntSet) Elems() []uint64 {
 }
 
 func (s *IntSet) Add(x int) {
-	word, bit := x/64, uint(x%64)
+	word, bit := x/SIZE, uint(x%SIZE)
 	for word >= len(s.words) {
 		s.words = append(s.words, 0)
 	}
@@ -53,7 +57,7 @@ func (s *IntSet) AddAll(numbers ...int) {
 }
 
 func (s *IntSet) Remove(x int) {
-	word, bit := x/64, uint(x%64)
+	word, bit := x/SIZE, uint(x%SIZE)
 	if word >= len(s.words) {
 		// 何もしない
 	} else {
@@ -62,7 +66,7 @@ func (s *IntSet) Remove(x int) {
 }
 
 func (s *IntSet) Has(x int) bool {
-	word, bit := x/64, uint(x%64)
+	word, bit := x/SIZE, uint(x%SIZE)
 	return word < len(s.words) && s.words[word]&(1<<bit) != 0
 }
 
@@ -95,7 +99,7 @@ func (s *IntSet) DifferenceWith(other *IntSet) *IntSet {
 	result := &IntSet{}
 	// FIXME: もっときれいに
 	for i := range s.words {
-		var word uint64
+		var word uint
 		if len(other.words) <= i {
 			word = s.words[i]
 		} else {
@@ -113,11 +117,11 @@ func (s *IntSet) SymetricDifferenceWith(other *IntSet) *IntSet {
 }
 
 func (s *IntSet) Clear() {
-	s.words = []uint64{}
+	s.words = []uint{}
 }
 
 func (s *IntSet) Copy() *IntSet {
-	words := make([]uint64, len(s.words))
+	words := make([]uint, len(s.words))
 	copy(words, s.words)
 	dst := &IntSet{}
 	dst.words = words
@@ -132,12 +136,12 @@ func (s *IntSet) String() string {
 		if word == 0 {
 			continue
 		}
-		for j := 0; j < 64; j++ {
+		for j := 0; j < SIZE; j++ {
 			if word&(1<<uint(j)) != 0 {
 				if buf.Len() > len("{") {
 					buf.WriteByte(' ')
 				}
-				fmt.Fprintf(&buf, "%d", 64*i+j)
+				fmt.Fprintf(&buf, "%d", SIZE*i+j)
 			}
 		}
 	}
@@ -146,7 +150,7 @@ func (s *IntSet) String() string {
 	return buf.String()
 }
 
-func popcount(x uint64) (count int) {
+func popcount(x uint) (count int) {
 	for ; x != 0; x &= x - 1 {
 		count++
 	}

@@ -21,11 +21,11 @@ func TestAddAll(t *testing.T) {
 func TestElems(t *testing.T) {
 	tests := []struct {
 		set  *IntSet
-		want []uint64
+		want []uint
 	}{
-		{New(), []uint64{}},
-		{New(1, 2, 3), []uint64{1, 2, 3}},
-		{New(1, 2, 3, 100), []uint64{1, 2, 3, 100}},
+		{New(), []uint{}},
+		{New(1, 2, 3), []uint{1, 2, 3}},
+		{New(1, 2, 3, 100), []uint{1, 2, 3, 100}},
 	}
 	for _, test := range tests {
 		if got := test.set.Elems(); !equalSlice(got, test.want) {
@@ -246,7 +246,7 @@ func testEqual(t *testing.T, want, got *IntSet) bool {
 	return true
 }
 
-func equalSlice(a, b []uint64) bool {
+func equalSlice(a, b []uint) bool {
 	if (a == nil) != (b == nil) {
 		return false
 	}
