@@ -96,16 +96,9 @@ func (s *IntSet) IntersectWith(other *IntSet) *IntSet {
 }
 
 func (s *IntSet) DifferenceWith(other *IntSet) *IntSet {
-	result := &IntSet{}
-	// FIXME: もっときれいに
-	for i := range s.words {
-		var word uint
-		if len(other.words) <= i {
-			word = s.words[i]
-		} else {
-			word = s.words[i] & ^other.words[i]
-		}
-		result.words = append(result.words, word)
+	result := s.Copy()
+	for i := 0; i < min(len(s.words), len(other.words)); i++ {
+		result.words[i] &= ^other.words[i]
 	}
 	return result
 }
@@ -155,4 +148,12 @@ func popcount(x uint) (count int) {
 		count++
 	}
 	return
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
 }
