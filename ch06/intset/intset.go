@@ -84,11 +84,7 @@ func (s *IntSet) UnionWith(other *IntSet) *IntSet {
 
 func (s *IntSet) IntersectWith(other *IntSet) *IntSet {
 	result := &IntSet{}
-	// FIXME: もっときれいに
-	for i := range s.words {
-		if len(other.words) <= i {
-			break
-		}
+	for i := 0; i < min(len(s.words), len(other.words)); i++ {
 		word := s.words[i] & other.words[i]
 		result.words = append(result.words, word)
 	}
