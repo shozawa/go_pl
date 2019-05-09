@@ -29,14 +29,10 @@ func (s *IntSet) Len() (count int) {
 }
 
 func (s *IntSet) Elems() []uint {
-	// FIXME: なんかもっと賢いやり方がありそう
 	numbers := []uint{}
-	for i := range s.words {
-		for j := 0; j < SIZE; j++ {
-			number := i*SIZE + j
-			if s.Has(number) {
-				numbers = append(numbers, uint(i*SIZE+j))
-			}
+	for i := 0; i < len(s.words)*SIZE; i++ {
+		if s.Has(i) {
+			numbers = append(numbers, uint(i))
 		}
 	}
 	return numbers

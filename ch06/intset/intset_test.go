@@ -25,7 +25,7 @@ func TestElems(t *testing.T) {
 	}{
 		{New(), []uint{}},
 		{New(1, 2, 3), []uint{1, 2, 3}},
-		{New(1, 2, 3, 100), []uint{1, 2, 3, 100}},
+		{New(0, 63, 64, 65, 127, 128), []uint{0, 63, 64, 65, 127, 128}},
 	}
 	for _, test := range tests {
 		if got := test.set.Elems(); !equalSlice(got, test.want) {
