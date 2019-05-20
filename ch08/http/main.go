@@ -17,6 +17,7 @@ func main() {
 	http.HandleFunc("/price", db.price)
 	http.HandleFunc("/update", db.update)
 	http.HandleFunc("/get", db.get)
+	http.HandleFunc("/delete", db.delete)
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
@@ -48,6 +49,18 @@ func (db database) get(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, "%s %s\n", item, db[item])
+}
+
+func (db database) delete(w http.ResponseWriter, req *http.Request) {
+	item := req.URL.Query().Get("item")
+	_, ok := db[item]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "no such item: %q\n", item)
+		return
+	}
+	delete(db, item)
+	fmt.Fprint(w, "success")
 }
 
 func (db database) update(w http.ResponseWriter, req *http.Request) {
