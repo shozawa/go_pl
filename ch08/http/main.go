@@ -22,6 +22,12 @@ func main() {
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
+/*
+ * TODO:
+ * ・適切な HTTP Method を使う
+ * ・重複の削除
+ */
+
 type database map[string]dollers
 
 func (db database) list(w http.ResponseWriter, req *http.Request) {
