@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -31,8 +32,23 @@ func main() {
 type database map[string]dollers
 
 func (db database) list(w http.ResponseWriter, req *http.Request) {
-	for item, price := range db {
-		fmt.Fprintf(w, "%s: %s\n", item, price)
+	var t = template.Must(template.New("table").Parse(`
+	<table>
+	<tr>
+	  <th>Item</th>
+	  <th>Price</th>
+	</tr>
+	{{range $item, $price := .}}
+	<tr>
+	  <td>{{$item}}</td>
+	  <td>{{$price}}</td>
+	</tr>
+	{{end}}
+	<tr>
+	</table>
+	`))
+	if err := t.Execute(w, db); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
