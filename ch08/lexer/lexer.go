@@ -5,7 +5,9 @@ import (
 )
 
 func New(input string) *Lexer {
-	return &Lexer{input: input}
+	l := &Lexer{input: input}
+	l.ch = l.input[0]
+	return l
 }
 
 type Lexer struct {
@@ -15,5 +17,59 @@ type Lexer struct {
 }
 
 func (l *Lexer) NextToken() token.Token {
-	return token.Token{Type: token.ASTERISK, Literal: "*"}
+	var tok token.Token
+
+	l.skipWhitespace()
+
+	switch {
+	case isDigit(l.ch):
+		return l.readDigit()
+	}
+
+	switch l.ch {
+	case '*':
+		tok = token.Token{Type: token.ASTERISK, Literal: "*"}
+	case '+':
+		tok = token.Token{Type: token.PLUS, Literal: "+"}
+	case 0:
+		tok = token.Token{Type: token.EOF}
+	default:
+		panic("Lexer error")
+	}
+
+	l.readChar()
+
+	return tok
+}
+
+func (l *Lexer) readDigit() token.Token {
+	start := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	literal := l.input[start:l.position]
+	return token.Token{Type: token.FLOAT, Literal: literal}
+}
+
+func (l *Lexer) readChar() {
+	l.position += 1
+	if l.position >= len(l.input) {
+		l.ch = 0
+	} else {
+		l.ch = l.input[l.position]
+	}
+}
+
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
+}
+
+func isDigit(ch byte) bool {
+	return ch >= '0' && ch <= '9'
+}
+
+func isIdentifier(ch byte) bool {
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
 }

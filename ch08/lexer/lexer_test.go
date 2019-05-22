@@ -25,6 +25,7 @@ func TestNextToken(t *testing.T) {
 				token.Token{Type: token.FLOAT, Literal: "1"},
 				token.Token{Type: token.PLUS, Literal: "+"},
 				token.Token{Type: token.FLOAT, Literal: "1"},
+				token.Token{Type: token.EOF, Literal: ""},
 			},
 		},
 	}
