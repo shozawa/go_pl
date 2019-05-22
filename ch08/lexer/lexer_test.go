@@ -20,11 +20,34 @@ func TestNextToken(t *testing.T) {
 		want  []token.Token
 	}{
 		{
+			"42",
+			[]token.Token{
+				token.Token{Type: token.FLOAT, Literal: "42"},
+				token.Token{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
 			"1 + 1",
 			[]token.Token{
 				token.Token{Type: token.FLOAT, Literal: "1"},
 				token.Token{Type: token.PLUS, Literal: "+"},
 				token.Token{Type: token.FLOAT, Literal: "1"},
+				token.Token{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`
+			x = 16 
+			sqrt(x)
+			`,
+			[]token.Token{
+				token.Token{Type: token.INDT, Literal: "x"},
+				token.Token{Type: token.ASSIGN, Literal: "="},
+				token.Token{Type: token.FLOAT, Literal: "16"},
+				token.Token{Type: token.INDT, Literal: "sqrt"},
+				token.Token{Type: token.LPAREN, Literal: "("},
+				token.Token{Type: token.INDT, Literal: "x"},
+				token.Token{Type: token.RPAREN, Literal: ")"},
 				token.Token{Type: token.EOF, Literal: ""},
 			},
 		},

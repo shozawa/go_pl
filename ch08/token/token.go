@@ -10,7 +10,10 @@ const (
 	MINUS    = "-"
 	ASTERISK = "*"
 	SLASH    = "/"
+	LPAREN   = "("
+	RPAREN   = ")"
 	EOF      = "EOF"
+	ILLEGAL  = "ILLEGAL"
 )
 
 type Token struct {

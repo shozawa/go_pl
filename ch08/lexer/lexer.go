@@ -24,17 +24,29 @@ func (l *Lexer) NextToken() token.Token {
 	switch {
 	case isDigit(l.ch):
 		return l.readDigit()
+	case isIdentifier(l.ch):
+		return l.readIdentifier()
 	}
 
 	switch l.ch {
-	case '*':
-		tok = token.Token{Type: token.ASTERISK, Literal: "*"}
 	case '+':
 		tok = token.Token{Type: token.PLUS, Literal: "+"}
+	case '-':
+		tok = token.Token{Type: token.MINUS, Literal: "-"}
+	case '*':
+		tok = token.Token{Type: token.ASTERISK, Literal: "*"}
+	case '/':
+		tok = token.Token{Type: token.SLASH, Literal: "/"}
+	case '=':
+		tok = token.Token{Type: token.ASSIGN, Literal: "="}
+	case '(':
+		tok = token.Token{Type: token.LPAREN, Literal: "("}
+	case ')':
+		tok = token.Token{Type: token.RPAREN, Literal: ")"}
 	case 0:
 		tok = token.Token{Type: token.EOF}
 	default:
-		panic("Lexer error")
+		tok = token.Token{Type: token.ILLEGAL, Literal: string(l.ch)}
 	}
 
 	l.readChar()
@@ -49,6 +61,15 @@ func (l *Lexer) readDigit() token.Token {
 	}
 	literal := l.input[start:l.position]
 	return token.Token{Type: token.FLOAT, Literal: literal}
+}
+
+func (l *Lexer) readIdentifier() token.Token {
+	start := l.position
+	for isIdentifier(l.ch) {
+		l.readChar()
+	}
+	literal := l.input[start:l.position]
+	return token.Token{Type: token.INDT, Literal: literal}
 }
 
 func (l *Lexer) readChar() {
