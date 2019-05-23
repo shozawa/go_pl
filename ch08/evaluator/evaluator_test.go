@@ -31,7 +31,7 @@ func TestParseAndEval(t *testing.T) {
 		{"1 + 2", nil, 3},
 	}
 	for _, test := range tests {
-		if got := Eval(test.input); got != test.want {
+		if got := Eval(test.input, test.env); got != test.want {
 			t.Errorf("want=%v, got=%v", test.want, got)
 		}
 	}
