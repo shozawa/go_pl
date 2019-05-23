@@ -51,6 +51,18 @@ func TestNextToken(t *testing.T) {
 				token.Token{Type: token.EOF, Literal: ""},
 			},
 		},
+		{
+			"pow(2, 4)",
+			[]token.Token{
+				token.Token{Type: token.INDT, Literal: "pow"},
+				token.Token{Type: token.LPAREN, Literal: "("},
+				token.Token{Type: token.FLOAT, Literal: "2"},
+				token.Token{Type: token.COMMA, Literal: ","},
+				token.Token{Type: token.FLOAT, Literal: "4"},
+				token.Token{Type: token.RPAREN, Literal: ")"},
+				token.Token{Type: token.EOF, Literal: ""},
+			},
+		},
 	}
 	for _, test := range tests {
 		l := New(test.input)

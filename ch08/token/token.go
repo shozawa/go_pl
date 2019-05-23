@@ -12,6 +12,7 @@ const (
 	SLASH    = "/"
 	LPAREN   = "("
 	RPAREN   = ")"
+	COMMA    = ","
 	EOF      = "EOF"
 	ILLEGAL  = "ILLEGAL"
 )
