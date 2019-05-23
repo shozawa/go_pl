@@ -16,6 +16,7 @@ const (
 	LOWEST
 	SUM
 	PRODUCT
+	CALL
 )
 
 var precedences = map[token.TokenType]int{
@@ -23,6 +24,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.ASTERISK: PRODUCT,
 	token.SLASH:    PRODUCT,
+	token.LPAREN:   CALL,
 }
 
 type Parser struct {
@@ -40,6 +42,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseBinary)
 	p.registerInfix(token.ASTERISK, p.parseBinary)
 	p.registerInfix(token.SLASH, p.parseBinary)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -57,7 +60,15 @@ func (p *Parser) Parse() program {
 }
 
 func (p *Parser) parseExpression(precedence int) Expr {
-	left := p.parseFloatLiteral()
+	var left Expr
+	switch p.curToken.Type {
+	case token.FLOAT:
+		left = p.parseFloatLiteral()
+	case token.INDT:
+		left = p.parseIdent()
+	default:
+		panic("error")
+	}
 
 	for precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
@@ -80,6 +91,10 @@ func (p *Parser) parseFloatLiteral() Expr {
 	return literal(value)
 }
 
+func (p *Parser) parseIdent() Expr {
+	return Var(p.curToken.Literal)
+}
+
 func (p *Parser) parseBinary(left Expr) Expr {
 	// FIXME: op を string 型にして余計な型変換をなくす
 	b := binary{op: rune(p.curToken.Literal[0]), x: left}
@@ -87,6 +102,31 @@ func (p *Parser) parseBinary(left Expr) Expr {
 	p.nextToken() // cosume op
 	b.y = p.parseExpression(precedence)
 	return b
+}
+
+func (p *Parser) parseCallExpression(left Expr) Expr {
+	ident, ok := left.(Var)
+	if !ok {
+		// FIXME: 適切にエラー処理する
+		panic("error")
+	}
+	exp := call{fn: string(ident)}
+	exp.args = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []Expr {
+	var args []Expr
+
+	p.nextToken() // consume '('
+
+	// TODO: 複数の引数に対応する
+	arg := p.parseExpression(LOWEST)
+	args = append(args, arg)
+
+	p.expectPeek(token.RPAREN) // ')'
+
+	return args
 }
 
 func (p *Parser) nextToken() {
@@ -104,4 +144,17 @@ func (p *Parser) peekPrecedence() int {
 
 func (p *Parser) registerInfix(tokenType token.TokenType, f infixParseFn) {
 	p.infixParseFns[tokenType] = f
+}
+
+func (p *Parser) peekTokenIs(expect token.TokenType) bool {
+	return p.peekToken.Type == expect
+}
+
+func (p *Parser) expectPeek(expect token.TokenType) bool {
+	if p.peekToken.Type == expect {
+		p.nextToken()
+		return true
+	} else {
+		return false
+	}
 }

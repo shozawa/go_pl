@@ -32,6 +32,7 @@ func TestParseAndEval(t *testing.T) {
 		{"5 - 2", nil, 3},
 		{"2 * 3", nil, 6},
 		{"10 / 5", nil, 2},
+		{"sqrt(4)", nil, 2},
 	}
 	for _, test := range tests {
 		if got := Eval(test.input, test.env); got != test.want {
