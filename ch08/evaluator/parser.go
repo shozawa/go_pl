@@ -7,6 +7,18 @@ import (
 	"github.com/shozawa/go_pl/ch08/token"
 )
 
+const (
+	_ = iota
+	LOWEST
+	SUM
+	PRODUCT
+)
+
+var precedences = map[token.TokenType]int{
+	token.PLUS:     SUM,
+	token.ASTERISK: PRODUCT,
+}
+
 type Parser struct {
 	l         *lexer.Lexer
 	curToken  token.Token
@@ -23,26 +35,50 @@ func NewParser(l *lexer.Lexer) *Parser {
 func (p *Parser) Parse() program {
 	prog := program{}
 	for p.curToken.Type != token.EOF {
-		stmt := p.parseExpression()
+		stmt := p.parseExpression(LOWEST)
 		prog.statements = append(prog.statements, stmt)
 		p.nextToken()
 	}
 	return prog
 }
 
-func (p *Parser) parseExpression() Expr {
-	switch p.curToken.Type {
-	case token.FLOAT:
-		value, err := strconv.ParseFloat(p.curToken.Literal, 64)
-		if err != nil {
-			// TODO: エラー処理
-		}
-		return literal(value)
+func (p *Parser) parseExpression(precedence int) Expr {
+	left := p.parseFloatLiteral()
+
+	for precedence < p.peekPrecedence() {
+		p.nextToken()
+		left = p.parseBinary(left)
 	}
-	panic("parse error")
+
+	return left
+}
+
+func (p *Parser) parseFloatLiteral() Expr {
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	if err != nil {
+		// TODO: エラー処理
+	}
+	return literal(value)
+}
+
+func (p *Parser) parseBinary(left Expr) Expr {
+	// FIXME: op を string 型にして余計な型変換をなくす
+	b := binary{op: rune(p.curToken.Literal[0]), x: left}
+	precedence := p.curPrecedence()
+	p.nextToken() // cosume op
+	b.y = p.parseExpression(precedence)
+	return b
 }
 
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
+}
+
+func (p *Parser) curPrecedence() int {
+	return precedences[p.curToken.Type]
+}
+
+func (p *Parser) peekPrecedence() int {
+	return precedences[p.peekToken.Type]
 }
