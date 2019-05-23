@@ -124,6 +124,15 @@ func (p *Parser) parseCallArguments() []Expr {
 	arg := p.parseExpression(LOWEST)
 	args = append(args, arg)
 
+	for p.peekTokenIs(token.COMMA) {
+
+		p.nextToken() // consume prev arg
+		p.nextToken() // consume ','
+
+		arg := p.parseExpression(LOWEST)
+		args = append(args, arg)
+	}
+
 	p.expectPeek(token.RPAREN) // ')'
 
 	return args
