@@ -8,7 +8,8 @@ import (
 )
 
 type (
-	infixParseFn func(Expr) Expr
+	prefixParsefn func() Expr
+	infixParseFn  func(Expr) Expr
 )
 
 const (
@@ -28,14 +29,20 @@ var precedences = map[token.TokenType]int{
 }
 
 type Parser struct {
-	l             *lexer.Lexer
-	curToken      token.Token
-	peekToken     token.Token
-	infixParseFns map[token.TokenType]infixParseFn
+	l         *lexer.Lexer
+	curToken  token.Token
+	peekToken token.Token
+
+	prefixParsefns map[token.TokenType]prefixParsefn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 func NewParser(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l}
+
+	p.prefixParsefns = make(map[token.TokenType]prefixParsefn)
+	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
+	p.registerPrefix(token.INDT, p.parseIdent)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseBinary)
@@ -60,15 +67,14 @@ func (p *Parser) Parse() program {
 }
 
 func (p *Parser) parseExpression(precedence int) Expr {
-	var left Expr
-	switch p.curToken.Type {
-	case token.FLOAT:
-		left = p.parseFloatLiteral()
-	case token.INDT:
-		left = p.parseIdent()
-	default:
-		panic("error")
+	prefix := p.prefixParsefns[p.curToken.Type]
+
+	if prefix == nil {
+		// FIXME: どんなときに nil になる？ 必要があればエラー処理
+		panic("parser error")
 	}
+
+	left := prefix()
 
 	for precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
@@ -149,6 +155,10 @@ func (p *Parser) curPrecedence() int {
 
 func (p *Parser) peekPrecedence() int {
 	return precedences[p.peekToken.Type]
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, f prefixParsefn) {
+	p.prefixParsefns[tokenType] = f
 }
 
 func (p *Parser) registerInfix(tokenType token.TokenType, f infixParseFn) {
