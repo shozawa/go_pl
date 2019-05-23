@@ -9,6 +9,18 @@ type Expr interface {
 	Eval(env Env) float64
 }
 
+type program struct {
+	statements []Expr
+}
+
+func (p program) Eval(env Env) float64 {
+	var result float64
+	for _, stmt := range p.statements {
+		result = stmt.Eval(env)
+	}
+	return result
+}
+
 type Var string
 
 func (v Var) Eval(env Env) float64 {
