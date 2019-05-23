@@ -16,7 +16,9 @@ const (
 
 var precedences = map[token.TokenType]int{
 	token.PLUS:     SUM,
+	token.MINUS:    SUM,
 	token.ASTERISK: PRODUCT,
+	token.SLASH:    PRODUCT,
 }
 
 type Parser struct {
