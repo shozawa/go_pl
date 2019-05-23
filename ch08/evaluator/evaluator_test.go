@@ -28,6 +28,7 @@ func TestParseAndEval(t *testing.T) {
 		want  float64
 	}{
 		{"5", nil, 5},
+		{"-5", nil, -5},
 		{"1 + 2", nil, 3},
 		{"5 - 2", nil, 3},
 		{"2 * 3", nil, 6},

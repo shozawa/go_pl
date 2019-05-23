@@ -43,6 +43,8 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.prefixParsefns = make(map[token.TokenType]prefixParsefn)
 	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(token.INDT, p.parseIdent)
+	p.registerPrefix(token.PLUS, p.parseUnary)
+	p.registerPrefix(token.MINUS, p.parseUnary)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseBinary)
@@ -99,6 +101,13 @@ func (p *Parser) parseFloatLiteral() Expr {
 
 func (p *Parser) parseIdent() Expr {
 	return Var(p.curToken.Literal)
+}
+
+func (p *Parser) parseUnary() Expr {
+	u := unary{op: rune(p.curToken.Literal[0])}
+	p.nextToken() // consume 'op'
+	u.x = p.parseExpression(LOWEST)
+	return u
 }
 
 func (p *Parser) parseBinary(left Expr) Expr {
