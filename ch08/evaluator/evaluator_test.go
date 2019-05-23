@@ -20,3 +20,19 @@ func TestEval(t *testing.T) {
 		}
 	}
 }
+
+func TestParseAndEval(t *testing.T) {
+	tests := []struct {
+		input string
+		env   Env
+		want  float64
+	}{
+		{"5", nil, 5},
+		{"1 + 2", nil, 3},
+	}
+	for _, test := range tests {
+		if got := Eval(test.input); got != test.want {
+			t.Errorf("want=%v, got=%v", test.want, got)
+		}
+	}
+}
