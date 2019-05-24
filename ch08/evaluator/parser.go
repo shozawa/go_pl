@@ -15,12 +15,14 @@ type (
 const (
 	_ = iota
 	LOWEST
+	ASSIGN
 	SUM
 	PRODUCT
 	CALL
 )
 
 var precedences = map[token.TokenType]int{
+	token.ASSIGN:   ASSIGN,
 	token.PLUS:     SUM,
 	token.MINUS:    SUM,
 	token.ASTERISK: PRODUCT,
@@ -52,6 +54,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseBinary)
 	p.registerInfix(token.ASTERISK, p.parseBinary)
 	p.registerInfix(token.SLASH, p.parseBinary)
+	p.registerInfix(token.ASSIGN, p.parseBinary)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	p.nextToken()
@@ -122,6 +125,19 @@ func (p *Parser) parseGroupedExpression() Expr {
 	return exp
 }
 
+// FIXME: 全体的に汚い
+func (p *Parser) parseAssignment(left Expr) Expr {
+	idnt, ok := left.(Var)
+	if !ok {
+		// FIXME: 適切にエラー処理する
+		panic("error: expect Var")
+	}
+	b := binary{op: '=', x: idnt}
+	p.nextToken() // consume op
+	b.y = p.parseExpression(LOWEST)
+	return b
+}
+
 func (p *Parser) parseBinary(left Expr) Expr {
 	// FIXME: op を string 型にして余計な型変換をなくす
 	b := binary{op: rune(p.curToken.Literal[0]), x: left}
@@ -135,7 +151,7 @@ func (p *Parser) parseCallExpression(left Expr) Expr {
 	ident, ok := left.(Var)
 	if !ok {
 		// FIXME: 適切にエラー処理する
-		panic("error")
+		panic("error: expect Var")
 	}
 	exp := call{fn: string(ident)}
 	exp.args = p.parseCallArguments()
@@ -147,7 +163,6 @@ func (p *Parser) parseCallArguments() []Expr {
 
 	p.nextToken() // consume '('
 
-	// TODO: 複数の引数に対応する
 	arg := p.parseExpression(LOWEST)
 	args = append(args, arg)
 

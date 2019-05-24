@@ -27,6 +27,7 @@ func TestParseAndEval(t *testing.T) {
 		env   Env
 		want  float64
 	}{
+		{"x = 1", make(Env), 1},
 		{"5", nil, 5},
 		{"-5", nil, -5},
 		{"1 + 2", nil, 3},
