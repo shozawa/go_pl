@@ -45,6 +45,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.INDT, p.parseIdent)
 	p.registerPrefix(token.PLUS, p.parseUnary)
 	p.registerPrefix(token.MINUS, p.parseUnary)
+	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseBinary)
@@ -108,6 +109,17 @@ func (p *Parser) parseUnary() Expr {
 	p.nextToken() // consume 'op'
 	u.x = p.parseExpression(LOWEST)
 	return u
+}
+
+func (p *Parser) parseGroupedExpression() Expr {
+	p.nextToken() // consume '('
+
+	exp := p.parseExpression(LOWEST)
+
+	p.expectPeek(token.RPAREN) // ')'
+	p.nextToken()              // consume ')'
+
+	return exp
 }
 
 func (p *Parser) parseBinary(left Expr) Expr {

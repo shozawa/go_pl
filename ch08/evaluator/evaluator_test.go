@@ -33,6 +33,7 @@ func TestParseAndEval(t *testing.T) {
 		{"5 - 2", nil, 3},
 		{"2 * 3", nil, 6},
 		{"10 / 5", nil, 2},
+		{"3 * (2 + 3)", nil, 15},
 		{"sqrt(4)", nil, 2},
 		{"pow(2, 3)", nil, 8},
 	}
