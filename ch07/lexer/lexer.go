@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/shozawa/go_pl/ch08/token"
+	"github.com/shozawa/go_pl/ch07/token"
 )
 
 func New(input string) *Lexer {

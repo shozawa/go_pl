@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shozawa/go_pl/ch08/evaluator"
+	"github.com/shozawa/go_pl/ch07/evaluator"
 )
 
 func main() {

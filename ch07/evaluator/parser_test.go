@@ -3,7 +3,7 @@ package evaluator
 import (
 	"testing"
 
-	"github.com/shozawa/go_pl/ch08/lexer"
+	"github.com/shozawa/go_pl/ch07/lexer"
 )
 
 func TestParseLitral(t *testing.T) {

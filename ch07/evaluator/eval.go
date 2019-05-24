@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/shozawa/go_pl/ch08/lexer"
+	"github.com/shozawa/go_pl/ch07/lexer"
 )
 
 func Eval(input string, env Env) float64 {

@@ -3,8 +3,8 @@ package evaluator
 import (
 	"strconv"
 
-	"github.com/shozawa/go_pl/ch08/lexer"
-	"github.com/shozawa/go_pl/ch08/token"
+	"github.com/shozawa/go_pl/ch07/lexer"
+	"github.com/shozawa/go_pl/ch07/token"
 )
 
 type (
