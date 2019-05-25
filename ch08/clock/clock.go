@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"time"
 )
 
@@ -29,8 +30,17 @@ func main() {
 
 func handleConn(c net.Conn) {
 	defer c.Close()
+
+	location, err := time.LoadLocation(os.Getenv("TZ"))
+
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	for {
-		_, err := io.WriteString(c, time.Now().Format("15:04:05\n"))
+		now := time.Now().In(location)
+		_, err := io.WriteString(c, now.Format("15:04:05\n"))
 		if err != nil {
 			return
 		}
