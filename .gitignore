@@ -12,4 +12,6 @@
 *.out
 
 /ch02/bin
+/ch08/images/
 *.db
+.DS_Store
