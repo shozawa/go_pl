@@ -1,42 +1,41 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"sync"
 )
 
 var status = make(chan string)
 
+// FXIME: 間違ってそう
 func main() {
 	urls := []string{
-		"https://www.google.com",
 		"https://duckduckgo.com",
 		"https://www.bing.com",
+		"https://www.google.com",
 	}
-	fetch(urls)
-	for s := range status {
-		fmt.Println(s)
-	}
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	fetch(ctx, urls)
+	fmt.Println(<-status)
+	cancelFunc()
 }
 
-func fetch(urls []string) {
-	var wg sync.WaitGroup
+func fetch(ctx context.Context, urls []string) {
 	for _, url := range urls {
-		wg.Add(1)
 		go func(url string) {
-			defer wg.Done()
-			res, err := http.Get(url)
+			req, err := http.NewRequest("GET", url, nil)
 			if err != nil {
 				fmt.Print(err)
 			}
+			req = req.WithContext(ctx)
+			res, err := http.DefaultClient.Do(req)
+			if err != nil {
+				fmt.Print(err)
+			}
+			defer res.Body.Close()
+			fmt.Println(req)
 			status <- res.Status
 		}(url)
 	}
-	// Question: クローザーは goroutine じゃなきゃいけない？
-	// goroutine の外に出すとハングする
-	go func() {
-		wg.Wait()
-		close(status)
-	}()
 }
