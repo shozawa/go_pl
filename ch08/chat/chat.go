@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 )
 
-type client chan<- string
+type client struct {
+	name string
+	ch   chan string
+}
 
 var (
 	entering = make(chan client)
@@ -38,33 +42,43 @@ func broadcaster() {
 		select {
 		case msg := <-messages:
 			for cli := range clients {
-				cli <- msg
+				cli.ch <- msg
 			}
 		case cli := <-entering:
+			var names []string
+			for cli := range clients {
+				names = append(names, cli.name)
+			}
+			if len(clients) < 1 {
+				cli.ch <- "nobody in here"
+			} else {
+				cli.ch <- strings.Join(names, ", ") + " in here"
+			}
 			clients[cli] = true
 		case cli := <-leaving:
 			delete(clients, cli)
-			close(cli)
+			close(cli.ch)
 		}
 	}
 }
 
 func handleConn(conn net.Conn) {
-	ch := make(chan string)
-	go clientWriter(conn, ch)
+	var cli client
+	cli.ch = make(chan string)
+	go clientWriter(conn, cli.ch)
 
-	who := conn.RemoteAddr().String()
-	ch <- "You are " + who
-	messages <- who + " has arrived"
-	entering <- ch
+	cli.name = conn.RemoteAddr().String()
+	cli.ch <- "You are " + cli.name
+	messages <- cli.name + " has arrived"
+	entering <- cli
 
 	input := bufio.NewScanner(conn)
 	for input.Scan() {
-		messages <- who + ": " + input.Text()
+		messages <- cli.name + ": " + input.Text()
 	}
 
-	leaving <- ch
-	messages <- who + " has left"
+	leaving <- cli
+	messages <- cli.name + " has left"
 	conn.Close()
 }
 
