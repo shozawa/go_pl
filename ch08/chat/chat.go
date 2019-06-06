@@ -42,7 +42,13 @@ func broadcaster() {
 		select {
 		case msg := <-messages:
 			for cli := range clients {
-				cli.ch <- msg
+				select {
+				/* ex 8.15 */
+				case cli.ch <- msg:
+				default:
+					// skip message
+				}
+
 			}
 		case cli := <-entering:
 			var names []string
