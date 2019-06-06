@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 )
 
 type client struct {
@@ -70,8 +71,22 @@ func broadcaster() {
 
 func handleConn(conn net.Conn) {
 	var cli client
+	ping := make(chan struct{})
 	cli.ch = make(chan string)
 	go clientWriter(conn, cli.ch)
+
+	/* ex 8.13 */
+	// client killer
+	go func() {
+		for {
+			select {
+			case <-ping:
+				// survive
+			case <-time.After(5 * time.Minute):
+				conn.Close()
+			}
+		}
+	}()
 
 	input := bufio.NewScanner(conn)
 
@@ -84,6 +99,7 @@ func handleConn(conn net.Conn) {
 	entering <- cli
 
 	for input.Scan() {
+		ping <- struct{}{}
 		messages <- cli.name + ": " + input.Text()
 	}
 
