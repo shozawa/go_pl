@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/shozawa/go_pl/ch09/memo3"
+	"github.com/shozawa/go_pl/ch09/memo"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 		"https://golang.org",
 		"https://golang.org",
 	}
-	m := memo3.New(httpGetBody)
+	m := memo.New(httpGetBody)
 	var n sync.WaitGroup
 	for _, url := range urls {
 		n.Add(1)

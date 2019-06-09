@@ -1,8 +1,11 @@
-package memo1
+package memo
+
+import "sync"
 
 type Memo struct {
 	f     Func
 	cache map[string]result
+	mu    sync.Mutex
 }
 
 type Func func(key string) (interface{}, error)
@@ -17,10 +20,14 @@ func New(f Func) *Memo {
 }
 
 func (memo *Memo) Get(key string) (interface{}, error) {
+	memo.mu.Lock()
 	res, ok := memo.cache[key]
+	memo.mu.Unlock()
 	if !ok {
 		res.value, res.err = memo.f(key)
+		memo.mu.Lock()
 		memo.cache[key] = res
+		memo.mu.Unlock()
 	}
 	return res.value, res.err
 }
